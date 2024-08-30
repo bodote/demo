@@ -1,0 +1,3 @@
+[submodule "doc-submodule"]
+	path = doc-submodule
+	url = git@github.com:bodote/demoDoc.git
