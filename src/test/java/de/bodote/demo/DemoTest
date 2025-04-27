@@ -1,0 +1,69 @@
+package de.bas;
+
+import com.tngtech.jgiven.Stage;
+import com.tngtech.jgiven.annotation.Quoted;
+import com.tngtech.jgiven.integration.spring.EnableJGiven;
+import com.tngtech.jgiven.integration.spring.JGivenStage;
+import com.tngtech.jgiven.integration.spring.junit5.SimpleSpringScenarioTest;
+import datev.umstellungsclcp.Main;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.test.context.ContextConfiguration;
+
+@WebMvcTest(controllers = {DemoCtr.class})
+@Import({DemoTest.DemoTestStage.class, DemoTest.TestConfig.class})
+@EnableJGiven
+@EnableMethodSecurity
+@ContextConfiguration(classes = {Main.class})
+@Slf4j
+class DemoTest extends SimpleSpringScenarioTest<DemoTest.DemoTestStage> {
+    @Test
+    void should_return_something() {
+        given().some_test_state_$("test");
+        when().request_is_made();
+        then().response_should_contain_$(HttpStatus.OK);
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        // Define any necessary beans or configurations for the test here
+    }
+
+    @JGivenStage
+    public static class DemoTestStage extends Stage<DemoTest.DemoTestStage> {
+        public DemoTestStage some_test_state_$(String test) {
+            log.info(test);
+            // Set up the test state here
+            return self();
+        }
+
+        public DemoTestStage request_is_made() {
+            return self();
+        }
+
+        public DemoTestStage response_should_contain_$(@Quoted HttpStatusCode status) {
+            log.info(status.toString());
+            //            if (status == null) {
+            //                throw new IllegalArgumentException("Status cannot be null");
+            //            } else if (status == HttpStatus.OK) {
+            //                log.info("ok");
+            //            } else if (status == HttpStatus.NOT_FOUND) {
+            //                log.info("not found");
+            //            } else {
+            //                throw new IllegalStateException("Unexpected value: " + status);
+            //            }
+            switch (status) {
+                case HttpStatus.OK -> log.info("ok");
+                case HttpStatus.NOT_FOUND -> log.info("not found");
+                default -> throw new IllegalStateException("Unexpected value: " + status);
+            }
+            return self();
+        }
+    }
+}
